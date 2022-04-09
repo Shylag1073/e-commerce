@@ -9,19 +9,21 @@ router.get('/', (req, res) => {
 
   Tag.findAll({
     attributes: ['id','tag_name'],
+    order: [[ 'id' ]],
     include: [
       {
         model: Product,
         attributes:['id','product_name','price','stock','category_id'],
         through:ProductTag,
-        as:'Products'
+        as:'products'
       }
     ]
-    .then (dbData => res.json(dbData))
-    .catch (err => {
-      res.status(500).json(err);
-    })
   })
+  .then(dbData => res.json(dbData))
+  .catch (err => {
+    console.log(err);
+    res.status(500).json(err);
+  });
 });
 
 router.get('/:id', (req, res) => {
@@ -37,7 +39,7 @@ router.get('/:id', (req, res) => {
         model: Product,
         attributes:['id','product_name','price','stock','category_id'],
         through:ProductTag,
-        as:'Products'
+        as:'products'
       }
     ]
   })

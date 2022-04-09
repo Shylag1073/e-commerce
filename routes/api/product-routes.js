@@ -7,59 +7,67 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 router.get('/', (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
-  Product.findAll({
-    attributes:["id", "product","price","stock","category_id"],
-    include: [
-      {
-        model: Category,
-        attributes:["id","category_id"]
-      },
-      {
-        model:Tag,
-        attributes: ["id","tag_name"],
-        through:ProductTag,
-      }
-    ]
-}).then((dbData) => res.json (dbProductData))
-.catch((err => {
-  console.log(err);
-  res.status(500).json(err);
-}));
+  Product.findAll(
+    {
+      attributes:["id", "product","price","stock","category_id"],
+      order:[[ 'id']],
+     include: [
+        {
+          model: Category,
+          attributes:["id","category_id"]
+        },
+        {
+          model:Tag,
+          attributes: ["id","tag_name"],
+          through:ProductTag,
+          as: 'tags'
+        }
+      ]
+    }
+  )
+    .then((dbData) => {
+      res.json(dbData)
+      console.log(dbData);
+    })
+    .catch((err => {
+      console.log(err);
+      res.status(500).json(err);
+    }));
 
 });
 
 
 router.get('/:id'), (req, res) => {
   // get one product
-Product.findOne({
-  where: {
-    id: req.params.id,
-  },
-  attributes: ["id", "product","price","stock","category_id"],
-  include: [
-    {
-      model:Category,
-      attributes: ['id','category_name']
+  Product.findOne({
+    where: {
+      id: req.params.id,
     },
-    {
-      model:Tag,
-      attributes: ['id','tag_name'],
-      through:ProductTag,
-      as:"tags"
-    }
-  ]
-})
-.then(dbData =>{
-  if (!dbData) {
-    res.status(404).json({ message : 'No Product Found'});
-    return;
-  }
-  res.json(dbData);
-})
-.catch(err => {
-  console.log(err);
-  res.status(500).json(err);
-});
+    attributes: ["id", "product", "price", "stock", "category_id"],
+    include: [
+      {
+        model: Category,
+        attributes: ['id', 'category_name']
+      },
+      {
+        model: Tag,
+        attributes: ['id', 'tag_name'],
+        through: ProductTag,
+        as: "tags"
+      }
+    ]
+  })
+    .then(dbData => {
+      if (!dbData) {
+        res.status(404).json({ message: 'No Product Found' });
+        return;
+      }
+      res.json(dbData);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 }
 
 // create new product
@@ -138,20 +146,20 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', (req, res) => {
   // delete one product by its `id` value
-  Product.destroy ({
-    where: {id: req.params.id}
+  Product.destroy({
+    where: { id: req.params.id }
   })
-  .then(dbData =>{
-    if (!dbData) {
-      res.status(404).json({ message : 'No Product Found'});
-      return;
-    }
-    res.json(dbData);
-  })
-  .catch(err => {
-    console.log(err);
-    res.status(500).json(err);
-  });
+    .then(dbData => {
+      if (!dbData) {
+        res.status(404).json({ message: 'No Product Found' });
+        return;
+      }
+      res.json(dbData);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
 
 module.exports = router;
